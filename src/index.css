@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  width: 300px;
+  height: 400px;
+}
+
+/* Add these styles for the interface window */
+body[data-mode="interface"] {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.interface-window {
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.drag-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  -webkit-app-region: drag;
+  background: transparent;
+}
+
+.content {
+  padding: 24px;
+  padding-top: 28px;
+}

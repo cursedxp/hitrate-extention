@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cpx 'src/scripts/**/*' dist/scripts",
+    "build": "vite build && cpx 'src/scripts/**/*' dist/scripts && cpx 'src/content-scripts/**/*' dist/content-scripts",
     "watch": "vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview"

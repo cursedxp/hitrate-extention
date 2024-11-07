@@ -3,9 +3,17 @@
   "name": "HitMagnet - YouTube Inspiration Collector",
   "version": "1.0.0",
   "description": "Save YouTube video thumbnails to HitMagnet collections",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "identity"],
+  "oauth2": {
+    "client_id": "526762826728-ni3rj72p3e191b2k7ejp0dfn79kr3c34.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "./index.html"
-  }
+  },
+  "key": "aegingbeojjojgihdhgfmchbhphepaij"
 }

@@ -22,7 +22,6 @@ export const signInWithGoogle = () => {
         return;
       }
 
-      console.log("Got token:", token);
       resolve(token);
     });
   });

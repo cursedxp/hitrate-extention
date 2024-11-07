@@ -1,6 +1,12 @@
+import { useEffect } from "react";
 import Panel from "./ui/panel";
 import GoogleIcon from "./components/icons/GoogleIcon";
 import { signInWithGoogle, signOut } from "./services/auth";
+import {
+  saveUserToStorage,
+  getUserFromStorage,
+  removeUserFromStorage,
+} from "./services/storage";
 import { useState } from "react";
 
 export default function App() {
@@ -8,15 +14,26 @@ export default function App() {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    // Load user data when component mounts
+    const loadUser = async () => {
+      const savedUser = await getUserFromStorage();
+      if (savedUser) {
+        setUser(savedUser);
+      }
+    };
+    loadUser();
+  }, []);
+
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
       setError(null);
       const token = await signInWithGoogle();
 
-      // Fetch user info using the token
       const userInfo = await fetchUserInfo(token);
       setUser(userInfo);
+      await saveUserToStorage(userInfo);
     } catch (err) {
       setError(err.message || "Failed to sign in with Google");
     } finally {
@@ -28,6 +45,7 @@ export default function App() {
     try {
       setIsLoading(true);
       await signOut();
+      await removeUserFromStorage();
       setUser(null);
     } catch (err) {
       setError(err.message || "Failed to sign out");

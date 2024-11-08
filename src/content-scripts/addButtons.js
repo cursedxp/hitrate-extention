@@ -60,12 +60,66 @@ function addButtonsToVideos() {
         .querySelector("#channel-name")
         ?.textContent?.trim();
 
-      console.log("Save video:", {
-        title: videoTitle,
-        url: videoLink,
-        thumbnail: thumbnailImg?.src,
-        channel: channelName,
-      });
+      // Get panel and thumbnail container
+      const panel = document.getElementById("hitmagnet-panel");
+      const thumbnailsContainer = panel?.querySelector("#thumbnail-container");
+
+      if (thumbnailsContainer) {
+        // Check if we already have 5 thumbnails
+        if (thumbnailsContainer.children.length >= 5) {
+          alert("Maximum 5 thumbnails allowed");
+          return;
+        }
+
+        // Create thumbnail element
+        const thumbnailElement = document.createElement("div");
+        thumbnailElement.style.cssText = `
+          position: relative;
+          width: 120px;
+          cursor: pointer;
+        `;
+
+        thumbnailElement.innerHTML = `
+          <img src="${thumbnailImg?.src}" alt="${videoTitle}" style="
+            width: 120px;
+            height: 68px;
+            object-fit: cover;
+            border-radius: 4px;
+          "/>
+          <div style="
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 0 4px 0 4px;
+            cursor: pointer;
+          ">×</div>
+          <div style="
+            font-size: 11px;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          ">${videoTitle}</div>
+        `;
+
+        // Add click handler to remove thumbnail
+        const closeButton = thumbnailElement.querySelector(
+          'div[style*="position: absolute"]'
+        );
+        closeButton.onclick = () => thumbnailElement.remove();
+
+        // Add click handler to open video
+        thumbnailElement.onclick = (e) => {
+          if (e.target !== closeButton) {
+            window.open(videoLink, "_blank");
+          }
+        };
+
+        thumbnailsContainer.appendChild(thumbnailElement);
+      }
     });
 
     // Add a separator dot before the button

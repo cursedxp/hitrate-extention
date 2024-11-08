@@ -4,7 +4,6 @@ export default function Panel() {
       await chrome.scripting.executeScript({
         target: { tabId: tabs[0].id },
         func: () => {
-          // Create panel if it doesn't exist
           if (!document.getElementById("hitmagnet-panel")) {
             const div = document.createElement("div");
             div.id = "hitmagnet-panel";
@@ -19,24 +18,76 @@ export default function Panel() {
               box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
               width: 680px;
               padding: 16px;
-              display: flex;
-              flex-direction: column;
-              gap: 12px;
+              display: none;
             `;
 
             div.innerHTML = `
-              <h1 style="font-size: 1.5rem; font-weight: bold; color:#000000">
-                Saved Thumbnails
-              </h1>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h1 style="font-size: 1.5rem; font-weight: bold; color:#000000">
+                  Saved Thumbnails
+                </h1>
+                <button id="download-all" style="
+                  background: #065fd4;
+                  color: white;
+                  padding: 8px 16px;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-weight: 500;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                ">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Download All
+                </button>
+              </div>
               <div id="thumbnail-container" style="
                 display: flex;
                 gap: 12px;
-                flex-wrap: wrap;
-                justify-content: start;
-              "></div>
+                overflow-x: auto;
+                padding-bottom: 8px;
+                white-space: nowrap;
+                scrollbar-width: thin;
+                scrollbar-color: #909090 #f0f0f0;
+              ">
+              </div>
             `;
 
+            // Add custom scrollbar styles for webkit browsers
+            const style = document.createElement("style");
+            style.textContent = `
+              #thumbnail-container::-webkit-scrollbar {
+                height: 8px;
+              }
+              #thumbnail-container::-webkit-scrollbar-track {
+                background: #f0f0f0;
+                border-radius: 4px;
+              }
+              #thumbnail-container::-webkit-scrollbar-thumb {
+                background: #909090;
+                border-radius: 4px;
+              }
+              #thumbnail-container::-webkit-scrollbar-thumb:hover {
+                background: #707070;
+              }
+            `;
+            document.head.appendChild(style);
             document.body.appendChild(div);
+
+            // Add download functionality
+            const downloadBtn = div.querySelector("#download-all");
+            downloadBtn.addEventListener("click", () => {
+              const thumbnails = div.querySelectorAll(
+                "#thumbnail-container img"
+              );
+              thumbnails.forEach((img, index) => {
+                const link = document.createElement("a");
+                link.href = img.src;
+                link.download = `thumbnail-${index + 1}.jpg`;
+                link.click();
+              });
+            });
           }
         },
       });

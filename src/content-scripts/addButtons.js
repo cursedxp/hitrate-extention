@@ -56,60 +56,69 @@ function addButtonsToVideos() {
       const videoTitle = videoItem
         .querySelector("#video-title")
         ?.textContent?.trim();
-      const channelName = videoItem
-        .querySelector("#channel-name")
-        ?.textContent?.trim();
 
       // Get panel and thumbnail container
       const panel = document.getElementById("hitmagnet-panel");
       const thumbnailsContainer = panel?.querySelector("#thumbnail-container");
 
       if (thumbnailsContainer) {
-        // Check if we already have 5 thumbnails
-        if (thumbnailsContainer.children.length >= 5) {
-          alert("Maximum 5 thumbnails allowed");
-          return;
-        }
+        // Show panel when adding first thumbnail
+        panel.style.display = "block";
 
         // Create thumbnail element
         const thumbnailElement = document.createElement("div");
         thumbnailElement.style.cssText = `
           position: relative;
-          width: 120px;
+          flex: 0 0 200px;
           cursor: pointer;
         `;
 
         thumbnailElement.innerHTML = `
           <img src="${thumbnailImg?.src}" alt="${videoTitle}" style="
-            width: 120px;
-            height: 68px;
+            width: 200px;
+            height: 112px;
             object-fit: cover;
             border-radius: 4px;
           "/>
           <div style="
             position: absolute;
-            top: 0;
-            right: 0;
+            top: 8px;
+            right: 8px;
             background: rgba(0,0,0,0.5);
             color: white;
-            padding: 2px 4px;
-            border-radius: 0 4px 0 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background-color 0.2s;
           ">×</div>
-          <div style="
-            font-size: 11px;
-            margin-top: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          ">${videoTitle}</div>
         `;
 
-        // Add click handler to remove thumbnail
+        // Add hover effect for remove button
         const closeButton = thumbnailElement.querySelector(
           'div[style*="position: absolute"]'
         );
-        closeButton.onclick = () => thumbnailElement.remove();
+        closeButton.addEventListener("mouseenter", () => {
+          closeButton.style.backgroundColor = "rgba(0,0,0,0.7)";
+        });
+        closeButton.addEventListener("mouseleave", () => {
+          closeButton.style.backgroundColor = "rgba(0,0,0,0.5)";
+        });
+
+        // Add click handler to remove thumbnail
+        closeButton.onclick = (e) => {
+          e.stopPropagation();
+          thumbnailElement.remove();
+
+          // Hide panel if no thumbnails left
+          if (thumbnailsContainer.children.length === 0) {
+            panel.style.display = "none";
+          }
+        };
 
         // Add click handler to open video
         thumbnailElement.onclick = (e) => {

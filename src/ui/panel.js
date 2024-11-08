@@ -27,8 +27,8 @@ export default function Panel() {
                   Saved Thumbnails
                 </h1>
                 <div style="display: flex; gap: 8px;">
-                  <button id="download-all" style="
-                    background: #065fd4;
+                  <button id="subscribe-all" style="
+                    background: #ff0000;
                     color: white;
                     padding: 8px 16px;
                     border: none;
@@ -39,8 +39,8 @@ export default function Panel() {
                     align-items: center;
                     gap: 8px;
                   ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Download All
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    Subscribe All
                   </button>
                   <button id="close-panel" style="
                     background: #f0f0f0;
@@ -62,11 +62,37 @@ export default function Panel() {
                 display: flex;
                 gap: 12px;
                 overflow-x: auto;
-                padding-bottom: 8px;
                 white-space: nowrap;
                 scrollbar-width: thin;
                 scrollbar-color: #909090 #f0f0f0;
               ">
+              </div>
+              <div style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              ">
+                <span id="thumbnail-counter" style="
+                  color: #606060;
+                  font-size: 14px;
+                ">0 files selected</span>
+                <button id="download-all" style="
+                  color: black;
+                  background:none;
+                  padding: 8px 16px;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-weight: 500;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin-left: auto;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                ">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Download
+                </button>
               </div>
             `;
 
@@ -145,8 +171,9 @@ export default function Panel() {
               const thumbnailContainer = div.querySelector(
                 "#thumbnail-container"
               );
-              thumbnailContainer.innerHTML = ""; // Remove all thumbnails
-              div.style.display = "none"; // Hide the panel
+              thumbnailContainer.innerHTML = "";
+              updateThumbnailCounter();
+              div.style.display = "none";
             });
 
             // Helper function to extract video ID from thumbnail URL
@@ -169,6 +196,18 @@ export default function Panel() {
               }
 
               return null;
+            }
+
+            // Add function to update counter
+            function updateThumbnailCounter() {
+              const thumbnailContainer = div.querySelector(
+                "#thumbnail-container"
+              );
+              const counter = div.querySelector("#thumbnail-counter");
+              const count = thumbnailContainer.children.length;
+              counter.textContent = `${count} file${
+                count !== 1 ? "s" : ""
+              } selected`;
             }
           }
         },

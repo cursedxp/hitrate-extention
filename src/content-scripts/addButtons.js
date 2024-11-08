@@ -47,9 +47,14 @@ function addButtonsToVideos() {
 
     // Add click event listener
     button.addEventListener("click", (e) => {
-      e.preventDefault();
       e.stopPropagation();
 
+      const panel = document.getElementById("hitmagnet-panel");
+      if (!panel) return;
+
+      const thumbnailsContainer = panel.querySelector("#thumbnail-container");
+
+      // Create and add the thumbnail element
       const thumbnailContainer = videoItem.querySelector("#thumbnail");
       const videoLink = thumbnailContainer?.href;
       const thumbnailImg = thumbnailContainer?.querySelector("img");
@@ -57,78 +62,78 @@ function addButtonsToVideos() {
         .querySelector("#video-title")
         ?.textContent?.trim();
 
-      // Get panel and thumbnail container
-      const panel = document.getElementById("hitmagnet-panel");
-      const thumbnailsContainer = panel?.querySelector("#thumbnail-container");
+      // Create thumbnail element
+      const thumbnailElement = document.createElement("div");
+      thumbnailElement.style.cssText = `
+        position: relative;
+        flex: 0 0 200px;
+        cursor: pointer;
+      `;
 
-      if (thumbnailsContainer) {
-        // Show panel when adding first thumbnail
-        panel.style.display = "block";
-
-        // Create thumbnail element
-        const thumbnailElement = document.createElement("div");
-        thumbnailElement.style.cssText = `
-          position: relative;
-          flex: 0 0 200px;
+      thumbnailElement.innerHTML = `
+        <img src="${thumbnailImg?.src}" alt="${videoTitle}" style="
+          width: 200px;
+          height: 112px;
+          object-fit: cover;
+          border-radius: 4px;
+        "/>
+        <div style="
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: rgba(0,0,0,0.5);
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 12px;
           cursor: pointer;
-        `;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          transition: background-color 0.2s;
+        ">×</div>
+      `;
 
-        thumbnailElement.innerHTML = `
-          <img src="${thumbnailImg?.src}" alt="${videoTitle}" style="
-            width: 200px;
-            height: 112px;
-            object-fit: cover;
-            border-radius: 4px;
-          "/>
-          <div style="
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: background-color 0.2s;
-          ">×</div>
-        `;
+      // Add hover effect for remove button
+      const closeButton = thumbnailElement.querySelector(
+        'div[style*="position: absolute"]'
+      );
+      closeButton.addEventListener("mouseenter", () => {
+        closeButton.style.backgroundColor = "rgba(0,0,0,0.7)";
+      });
+      closeButton.addEventListener("mouseleave", () => {
+        closeButton.style.backgroundColor = "rgba(0,0,0,0.5)";
+      });
 
-        // Add hover effect for remove button
-        const closeButton = thumbnailElement.querySelector(
-          'div[style*="position: absolute"]'
-        );
-        closeButton.addEventListener("mouseenter", () => {
-          closeButton.style.backgroundColor = "rgba(0,0,0,0.7)";
-        });
-        closeButton.addEventListener("mouseleave", () => {
-          closeButton.style.backgroundColor = "rgba(0,0,0,0.5)";
-        });
+      // Add click handler to remove thumbnail
+      closeButton.onclick = (e) => {
+        e.stopPropagation();
+        thumbnailElement.remove();
+        updateThumbnailCounter();
 
-        // Add click handler to remove thumbnail
-        closeButton.onclick = (e) => {
-          e.stopPropagation();
-          thumbnailElement.remove();
+        // Hide panel if no thumbnails left
+        if (thumbnailsContainer.children.length === 0) {
+          panel.style.display = "none";
+        }
+      };
 
-          // Hide panel if no thumbnails left
-          if (thumbnailsContainer.children.length === 0) {
-            panel.style.display = "none";
-          }
-        };
+      // Add click handler to open video
+      thumbnailElement.onclick = (e) => {
+        if (e.target !== closeButton) {
+          window.open(videoLink, "_blank");
+        }
+      };
 
-        // Add click handler to open video
-        thumbnailElement.onclick = (e) => {
-          if (e.target !== closeButton) {
-            window.open(videoLink, "_blank");
-          }
-        };
+      thumbnailsContainer.appendChild(thumbnailElement);
 
-        thumbnailsContainer.appendChild(thumbnailElement);
-      }
+      // Update the counter after adding the thumbnail
+      const counter = panel.querySelector("#thumbnail-counter");
+      const count = thumbnailsContainer.children.length;
+      counter.textContent = `${count} file${count !== 1 ? "s" : ""} selected`;
+
+      // Show panel if it was hidden
+      panel.style.display = "block";
     });
 
     // Add a separator dot before the button
@@ -163,3 +168,11 @@ observer.observe(document.body, {
   childList: true,
   subtree: true,
 });
+
+function updateThumbnailCounter() {
+  const panel = document.getElementById("hitmagnet-panel");
+  const counter = panel.querySelector("#thumbnail-counter");
+  const thumbnailContainer = panel.querySelector("#thumbnail-container");
+  const count = thumbnailContainer.children.length;
+  counter.textContent = `${count} file${count !== 1 ? "s" : ""} selected`;
+}

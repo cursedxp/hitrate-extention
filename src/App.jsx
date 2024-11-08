@@ -8,6 +8,22 @@ import {
   removeUserFromStorage,
 } from "./services/storage";
 import { useState } from "react";
+// import { db } from "./services/firebase";
+// import { doc, getDoc } from "firebase/firestore";
+import { checkSubscriptionStatus } from "./services/userService";
+
+// const checkSubscriptionStatus = async (email) => {
+//   try {
+//     const userDoc = await getDoc(doc(db, "users", email));
+//     if (userDoc.exists()) {
+//       return userDoc.data().subscriptionStatus === "active";
+//     }
+//     return false;
+//   } catch (error) {
+//     console.error("Error checking subscription status:", error);
+//     return false;
+//   }
+// };
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,12 +45,25 @@ export default function App() {
     try {
       setIsLoading(true);
       setError(null);
-      const token = await signInWithGoogle();
 
+      // Clear any existing user data
+      await removeUserFromStorage();
+      setUser(null);
+
+      const { token, user: firebaseUser } = await signInWithGoogle();
       const userInfo = await fetchUserInfo(token);
-      setUser(userInfo);
-      await saveUserToStorage(userInfo);
+
+      // Combine Firebase user data with Google user info
+      const combinedUserInfo = {
+        ...userInfo,
+        uid: firebaseUser.uid,
+        isSubscribed: await checkSubscriptionStatus(userInfo.email),
+      };
+
+      setUser(combinedUserInfo);
+      await saveUserToStorage(combinedUserInfo);
     } catch (err) {
+      console.error("Sign in error:", err);
       setError(err.message || "Failed to sign in with Google");
     } finally {
       setIsLoading(false);
@@ -56,7 +85,7 @@ export default function App() {
 
   const fetchUserInfo = async (token) => {
     const response = await fetch(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
+      "https://www.googleapis.com/oauth2/v2/userinfo",
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -66,7 +95,16 @@ export default function App() {
     if (!response.ok) {
       throw new Error("Failed to fetch user info");
     }
-    return response.json();
+
+    const userInfo = await response.json();
+
+    // Check subscription status
+    const isSubscribed = await checkSubscriptionStatus(userInfo.email);
+
+    return {
+      ...userInfo,
+      isSubscribed,
+    };
   };
 
   return (
@@ -105,7 +143,7 @@ export default function App() {
         )}
         {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
       </div>
-      {user && <Panel />}
+      {user && <Panel user={user} />}
     </div>
   );
 }

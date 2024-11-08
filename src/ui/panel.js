@@ -1,9 +1,11 @@
-export default function Panel() {
+export default function Panel({ user }) {
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     try {
+      const isSubscribed = Boolean(user?.isSubscribed);
+
       await chrome.scripting.executeScript({
         target: { tabId: tabs[0].id },
-        func: () => {
+        func: (subscriptionStatus) => {
           if (!document.getElementById("hitmagnet-panel")) {
             const div = document.createElement("div");
             div.id = "hitmagnet-panel";
@@ -27,21 +29,27 @@ export default function Panel() {
                   Saved Thumbnails
                 </h1>
                 <div style="display: flex; gap: 8px;">
-                  <button id="subscribe-all" style="
-                    background: #ff0000;
-                    color: white;
-                    padding: 8px 16px;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                  ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                    Subscribe All
-                  </button>
+                  ${
+                    !subscriptionStatus
+                      ? `
+                    <button id="subscribe-all" style="
+                      background: #ff0000;
+                      color: white;
+                      padding: 8px 16px;
+                      border: none;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-weight: 500;
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                    ">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                      Subscribe
+                    </button>
+                  `
+                      : ""
+                  }
                   <button id="close-panel" style="
                     background: #f0f0f0;
                     color: #606060;
@@ -209,8 +217,17 @@ export default function Panel() {
                 count !== 1 ? "s" : ""
               } selected`;
             }
+
+            // Add subscribe button click handler if not subscribed
+            if (!subscriptionStatus) {
+              const subscribeBtn = div.querySelector("#subscribe-all");
+              subscribeBtn.addEventListener("click", () => {
+                window.open("https://your-subscription-url.com", "_blank");
+              });
+            }
           }
         },
+        args: [isSubscribed],
       });
     } catch (err) {
       console.error("Failed to inject interface:", err);

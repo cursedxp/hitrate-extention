@@ -25,7 +25,20 @@ export default defineConfig({
         },
         chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
+        manualChunks: {
+          // Vendor chunk for React and related packages
+          "vendor-react": ["react", "react-dom"],
+          // Firebase related packages
+          "vendor-firebase": [
+            "firebase/app",
+            "firebase/auth",
+            "firebase/firestore",
+          ],
+          // Other third-party dependencies can be added here
+        },
       },
     },
+    // Increase the warning limit if needed
+    chunkSizeWarningLimit: 1000,
   },
 });

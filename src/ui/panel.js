@@ -77,17 +77,67 @@ export default function Panel() {
 
             // Add download functionality
             const downloadBtn = div.querySelector("#download-all");
-            downloadBtn.addEventListener("click", () => {
+            downloadBtn.addEventListener("click", async () => {
               const thumbnails = div.querySelectorAll(
                 "#thumbnail-container img"
               );
-              thumbnails.forEach((img, index) => {
-                const link = document.createElement("a");
-                link.href = img.src;
-                link.download = `thumbnail-${index + 1}.jpg`;
-                link.click();
+
+              thumbnails.forEach(async (img) => {
+                try {
+                  // Get video ID from the thumbnail URL
+                  const videoId = getVideoIdFromUrl(img.src);
+                  if (!videoId) return;
+
+                  // Construct high-res thumbnail URL
+                  const highResUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+
+                  // Try to get maxresdefault first
+                  let response = await fetch(highResUrl);
+
+                  // If maxresdefault doesn't exist, fall back to hqdefault
+                  if (!response.ok) {
+                    const hqUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+                    response = await fetch(hqUrl);
+                  }
+
+                  if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `thumbnail-${videoId}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                  }
+                } catch (error) {
+                  console.error("Error downloading thumbnail:", error);
+                }
               });
             });
+
+            // Helper function to extract video ID from thumbnail URL
+            function getVideoIdFromUrl(url) {
+              // Handle different YouTube thumbnail URL formats
+              const patterns = [
+                /\/vi\/([^/]+)\//, // Standard format
+                /\/vi_webp\/([^/]+)\//, // WebP format
+                /\/([^/]+)\/hqdefault/, // HQ default format
+                /\/([^/]+)\/mqdefault/, // MQ default format
+                /\/([^/]+)\/sddefault/, // SD default format
+                /\/([^/]+)\/maxresdefault/, // Max res format
+              ];
+
+              for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                  return match[1];
+                }
+              }
+
+              return null;
+            }
           }
         },
       });
